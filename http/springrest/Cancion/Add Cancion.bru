@@ -1,0 +1,29 @@
+meta {
+  name: Add Cancion
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/cancion
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nombre": "lolol",
+    "duracion": 2.22,
+    "albumByAlbumId":{
+      "id":1,
+      "nombre":"...And Justice For All",
+      "anyo":1988,
+      "aristaByArtistaId": {
+        "id":1
+      },
+      "genreByGenreId":{
+        "id":2
+      }
+    }
+  }
+}

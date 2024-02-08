@@ -1,0 +1,30 @@
+meta {
+  name: Update Cancion
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:8080/cancion/68
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": 68,
+    "nombre": "epico",
+    "duracion": 3.33,
+    "albumByAlbumId":{
+      "id":1,
+      "nombre": "...And Justice for All",
+      "genreByGenreId":{
+        "id":1
+      },
+      "artistaByArtistaId":{
+        "id":1
+      }
+    }
+      
+  }
+}
