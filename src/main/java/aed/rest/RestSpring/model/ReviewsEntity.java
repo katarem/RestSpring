@@ -1,8 +1,11 @@
 package aed.rest.RestSpring.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -48,6 +51,18 @@ public class ReviewsEntity {
     @Basic
     @Column(name = "pub_year")
     private Short pubYear;
+
+    @OneToMany(mappedBy = "review")
+    @Column(name = "genres")
+    private List<GenresEntity> genres;
+
+    public List<GenresEntity> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<GenresEntity> genres) {
+        this.genres = genres;
+    }
 
     public Integer getReviewid() {
         return reviewid;
@@ -158,11 +173,11 @@ public class ReviewsEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ReviewsEntity that = (ReviewsEntity) o;
-        return Objects.equals(reviewid, that.reviewid) && Objects.equals(title, that.title) && Objects.equals(artist, that.artist) && Objects.equals(url, that.url) && Objects.equals(score, that.score) && Objects.equals(bestNewMusic, that.bestNewMusic) && Objects.equals(author, that.author) && Objects.equals(authorType, that.authorType) && Objects.equals(pubDate, that.pubDate) && Objects.equals(pubWeekday, that.pubWeekday) && Objects.equals(pubDay, that.pubDay) && Objects.equals(pubMonth, that.pubMonth) && Objects.equals(pubYear, that.pubYear);
+        return Objects.equals(reviewid, that.reviewid) && Objects.equals(title, that.title) && Objects.equals(artist, that.artist) && Objects.equals(url, that.url) && Objects.equals(score, that.score) && Objects.equals(bestNewMusic, that.bestNewMusic) && Objects.equals(author, that.author) && Objects.equals(authorType, that.authorType) && Objects.equals(pubDate, that.pubDate) && Objects.equals(pubWeekday, that.pubWeekday) && Objects.equals(pubDay, that.pubDay) && Objects.equals(pubMonth, that.pubMonth) && Objects.equals(pubYear, that.pubYear) && Objects.equals(genres, that.genres);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reviewid, title, artist, url, score, bestNewMusic, author, authorType, pubDate, pubWeekday, pubDay, pubMonth, pubYear);
+        return Objects.hash(reviewid, title, artist, url, score, bestNewMusic, author, authorType, pubDate, pubWeekday, pubDay, pubMonth, pubYear, genres);
     }
 }

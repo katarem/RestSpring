@@ -40,7 +40,7 @@ public class GenresController {
         if (!repository.existsById(id))
             return "No se modificó, no existía ese género";
         var genreDB = repository.findById(id).get();
-        genreDB.setReviewid(genre.getReviewid());
+        genreDB.setReview(genre.getReview());
         genreDB.setGenre(genre.getGenre());
         repository.save(genreDB);
         return "Género modificado correctamente";

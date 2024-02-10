@@ -5,7 +5,11 @@ meta {
 }
 
 get {
-  url: http://localhost:8080/artists/all
+  url: http://localhost:8080/artists/all?name=massive attack
   body: none
   auth: none
+}
+
+query {
+  name: massive attack
 }

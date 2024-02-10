@@ -1,5 +1,7 @@
 package aed.rest.RestSpring.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -11,12 +13,24 @@ public class GenresEntity {
     @Id
     @Column(name = "genreid")
     private int genreid;
-    @Basic
-    @Column(name = "reviewid")
-    private Integer reviewid;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "reviewid")
+    @JsonBackReference
+    private ReviewsEntity review;
+
     @Basic
     @Column(name = "genre")
+
     private String genre;
+
+    public ReviewsEntity getReview() {
+        return review;
+    }
+
+    public void setReview(ReviewsEntity review) {
+        this.review = review;
+    }
 
     public int getGenreid() {
         return genreid;
@@ -24,14 +38,6 @@ public class GenresEntity {
 
     public void setGenreid(int genreid) {
         this.genreid = genreid;
-    }
-
-    public Integer getReviewid() {
-        return reviewid;
-    }
-
-    public void setReviewid(Integer reviewid) {
-        this.reviewid = reviewid;
     }
 
     public String getGenre() {
@@ -47,11 +53,11 @@ public class GenresEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GenresEntity that = (GenresEntity) o;
-        return genreid == that.genreid && Objects.equals(reviewid, that.reviewid) && Objects.equals(genre, that.genre);
+        return genreid == that.genreid && Objects.equals(review, that.review) && Objects.equals(genre, that.genre);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(genreid, reviewid, genre);
+        return Objects.hash(genreid, review, genre);
     }
 }
