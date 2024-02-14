@@ -4,7 +4,12 @@ import aed.rest.RestSpring.model.ArtistsEntity;
 import aed.rest.RestSpring.model.LabelsEntity;
 import aed.rest.RestSpring.repository.ArtistsRepository;
 import aed.rest.RestSpring.repository.LabelsRepository;
+import aed.rest.RestSpring.utils.StringResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,40 +23,49 @@ public class LabelsController {
     LabelsRepository repository;
 
     @GetMapping("/all")
-    public List<LabelsEntity> getAllLabels() {
-        return repository.findAll();
+    public ResponseEntity<?> getAllLabels(@RequestParam(name = "index") Integer index,@RequestParam(name = "size") Integer size) {
+        if(index == null) index = 0;
+        if(size == null) size = 0;
+
+        Pageable pageable = PageRequest.of(index,size);
+        return new ResponseEntity<>(repository.findAll(pageable), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public Optional<LabelsEntity> getLabelById(@PathVariable("id") Integer id) {
-        return repository.findById(id);
+    public ResponseEntity<?> getLabelById(@PathVariable("id") Integer id) {
+        var opt = repository.findById(id);
+        return opt.isPresent() ? new ResponseEntity<>(opt.get(),HttpStatus.OK)
+                : new ResponseEntity<>(new StringResponse("No existía dicho label"),HttpStatus.NOT_FOUND);
     }
 
     @PostMapping
-    public String addLabel(@RequestBody LabelsEntity label) {
+    public ResponseEntity<?> addLabel(@RequestBody LabelsEntity label) {
         if (repository.existsById(label.getLabelid()))
-            return "Ya existía esa etiqueta";
+            return new ResponseEntity<>(new StringResponse("Ya existía ese label."),HttpStatus.CONFLICT);
         repository.save(label);
-        return "Etiqueta agregada correctamente";
+        return new ResponseEntity<>(new StringResponse("Label agregado correctamente."),HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public String updateLabel(@PathVariable("id") Integer id, @RequestBody LabelsEntity label) {
-        if (!repository.existsById(id))
-            return "No se modificó, no existía esa etiqueta";
-        var labelDB = repository.findById(id).get();
+    public ResponseEntity<?> updateLabel(@PathVariable("id") Integer id, @RequestBody LabelsEntity label) {
+        var labelDBOptional = repository.findById(id);
+        if(labelDBOptional.isEmpty()) {
+            repository.save(label);
+            return new ResponseEntity<>(new StringResponse("No existía ese label, pero se creó"), HttpStatus.CREATED);
+        }
+        var labelDB = labelDBOptional.get();
         labelDB.setLabel(label.getLabel());
         labelDB.setReviewid(label.getReviewid());
         repository.save(labelDB);
-        return "Etiqueta modificada correctamente";
+        return new ResponseEntity<>(new StringResponse("Label actualizado correctamente"),HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteLabel(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteLabel(@PathVariable("id") Integer id) {
         if (!repository.existsById(id))
-            return "No se eliminó esa etiqueta, no existe";
+            return new ResponseEntity<>(new StringResponse("No existía ese label"),HttpStatus.NOT_FOUND);
         repository.delete(repository.getReferenceById(id));
-        return "Etiqueta eliminada correctamente";
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

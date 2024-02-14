@@ -1,8 +1,6 @@
 package aed.rest.RestSpring.controller;
 
-import aed.rest.RestSpring.model.ArtistsEntity;
 import aed.rest.RestSpring.model.GenresEntity;
-import aed.rest.RestSpring.repository.ArtistsRepository;
 import aed.rest.RestSpring.repository.GenresRepository;
 import aed.rest.RestSpring.utils.StringResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/genres")
