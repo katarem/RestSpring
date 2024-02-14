@@ -4,7 +4,12 @@ import aed.rest.RestSpring.model.ArtistsEntity;
 import aed.rest.RestSpring.model.GenresEntity;
 import aed.rest.RestSpring.repository.ArtistsRepository;
 import aed.rest.RestSpring.repository.GenresRepository;
+import aed.rest.RestSpring.utils.StringResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,40 +23,51 @@ public class GenresController {
     GenresRepository repository;
 
     @GetMapping("/all")
-    public List<GenresEntity> getAllGenres() {
-        return repository.findAll();
+    public ResponseEntity<?> getAllGenres(@RequestParam(value = "index",required = false) Integer index, @RequestParam(value = "size", required = false) Integer size) {
+        if(index == null) index = 0;
+        if(size == null) size = 10;
+        Pageable pageable = PageRequest.of(index,size);
+        return new ResponseEntity<>(repository.findAll(pageable), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public Optional<GenresEntity> getGenreById(@PathVariable("id") Integer id) {
-        return repository.findById(id);
+    public ResponseEntity<?> getGenreById(@PathVariable("id") Integer id) {
+        var opt = repository.findById(id);
+        return opt.isPresent() ? new ResponseEntity<>(opt.get(),HttpStatus.OK)
+                               : new ResponseEntity<>(new StringResponse("No existía dicho género"),HttpStatus.NOT_FOUND);
     }
 
     @PostMapping
-    public String addGenre(@RequestBody GenresEntity genre) {
+    public ResponseEntity<?> addGenre(@RequestBody GenresEntity genre) {
         if (repository.existsById(genre.getGenreid()))
-            return "Ya existía ese género";
+            return new ResponseEntity<>(new StringResponse("Ya existía esa review"),HttpStatus.CONFLICT);
         repository.save(genre);
-        return "Género agregado correctamente";
+        return new ResponseEntity<>(new StringResponse("Review agregada correctamente."),HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public String updateGenre(@PathVariable("id") Integer id, @RequestBody GenresEntity genre) {
-        if (!repository.existsById(id))
-            return "No se modificó, no existía ese género";
-        var genreDB = repository.findById(id).get();
+    public ResponseEntity<?> updateGenre(@PathVariable("id") Integer id, @RequestBody GenresEntity genre) {
+        var genreDBOptional = repository.findById(id);
+        if(genreDBOptional.isEmpty()) {
+            repository.save(genre);
+            return new ResponseEntity<>(new StringResponse("No existía ese género, pero se creó"), HttpStatus.CREATED);
+        }
+
+        var genreDB = genreDBOptional.get();
         genreDB.setReview(genre.getReview());
         genreDB.setGenre(genre.getGenre());
         repository.save(genreDB);
-        return "Género modificado correctamente";
+
+        return new ResponseEntity<>(new StringResponse("Género actualizado correctamente."),HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteGenre(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteGenre(@PathVariable("id") Integer id) {
         if (!repository.existsById(id))
-            return "No se eliminó ese género, no existe";
+            return new ResponseEntity<>(new StringResponse("No existía ese género"),HttpStatus.NOT_FOUND);
         repository.delete(repository.getReferenceById(id));
-        return "Género eliminado correctamente";
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
     }
 
 }

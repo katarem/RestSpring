@@ -1,22 +1,18 @@
 package aed.rest.RestSpring.controller;
 
-import aed.rest.RestSpring.model.ArtistsEntity;
 import aed.rest.RestSpring.model.ReviewsEntity;
-import aed.rest.RestSpring.repository.ArtistsRepository;
 import aed.rest.RestSpring.repository.GenresRepository;
 import aed.rest.RestSpring.repository.ReviewsRepository;
 import aed.rest.RestSpring.utils.StringResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/reviews")
 public class ReviewsController {
@@ -28,11 +24,16 @@ public class ReviewsController {
     GenresRepository genresRepository;
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllReviews(@RequestParam(value = "nota", required = false) BigDecimal nota, @RequestParam(value = "genero", required = false) String genero) {
+    public ResponseEntity<?> getAllReviews(@RequestParam(value = "nota", required = false) BigDecimal nota, @RequestParam(value = "genero", required = false) String genero,
+                                           @RequestParam(value = "size",required = false) Integer size, @RequestParam(value = "index",required = false) Integer index) {
+        if(size == null) size = 10;
+        if(index == null) index = 0;
+
+        final Pageable pageable = PageRequest.of(index,size, Sort.by(Sort.Direction.DESC,"score"));
         if(nota != null && genero != null) return reviewsByNotaYGenero(nota, genero);
         else if(genero != null) return new ResponseEntity<>(repository.findByGenres(genero),HttpStatus.OK);
         else if(nota != null) return reviewsByNota(nota);
-        return new ResponseEntity<>(repository.findAll(), HttpStatus.OK);
+        return new ResponseEntity<>(repository.findAll(pageable), HttpStatus.OK);
     }
 
 
