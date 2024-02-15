@@ -1,5 +1,6 @@
 package aed.rest.RestSpring.controller;
 
+import aed.rest.RestSpring.exceptions.NotFoundException;
 import aed.rest.RestSpring.model.ArtistsEntity;
 import aed.rest.RestSpring.model.LabelsEntity;
 import aed.rest.RestSpring.repository.ArtistsRepository;
@@ -32,10 +33,11 @@ public class LabelsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getLabelById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getLabelById(@PathVariable("id") Integer id) throws NotFoundException {
         var opt = repository.findById(id);
-        return opt.isPresent() ? new ResponseEntity<>(opt.get(),HttpStatus.OK)
-                : new ResponseEntity<>(new StringResponse("No existía dicho label"),HttpStatus.NOT_FOUND);
+        if(opt.isPresent())
+            return new ResponseEntity<>(opt.get(),HttpStatus.OK);
+        throw new NotFoundException("No existe label con ese id");
     }
 
     @PostMapping
@@ -61,9 +63,9 @@ public class LabelsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteLabel(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteLabel(@PathVariable("id") Integer id) throws NotFoundException {
         if (!repository.existsById(id))
-            return new ResponseEntity<>(new StringResponse("No existía ese label"),HttpStatus.NOT_FOUND);
+            throw new NotFoundException("No existe label con ese id");
         repository.delete(repository.getReferenceById(id));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

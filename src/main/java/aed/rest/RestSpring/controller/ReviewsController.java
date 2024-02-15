@@ -1,5 +1,6 @@
 package aed.rest.RestSpring.controller;
 
+import aed.rest.RestSpring.exceptions.NotFoundException;
 import aed.rest.RestSpring.model.ReviewsEntity;
 import aed.rest.RestSpring.repository.GenresRepository;
 import aed.rest.RestSpring.repository.ReviewsRepository;
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/reviews")
 public class ReviewsController {
@@ -36,6 +39,18 @@ public class ReviewsController {
         return new ResponseEntity<>(repository.findAll(pageable), HttpStatus.OK);
     }
 
+    @GetMapping("/all/by-nota")
+    public ResponseEntity<?> getReviewsGroupedByNota(){
+        var t = repository.getReviewsByNota().stream().collect(
+                Collectors.groupingBy(
+                        array -> (BigDecimal) array[0],
+                        Collectors.mapping(array -> (ReviewsEntity) array[1], Collectors.toList())
+                )
+        );
+        return new ResponseEntity<>(t,HttpStatus.OK);
+    }
+
+
 
     private ResponseEntity<?> reviewsByNotaYGenero(BigDecimal nota, String genero){
         if(!isValidNota(nota)) return new ResponseEntity<>(new StringResponse("Nota inválida"),HttpStatus.BAD_REQUEST);
@@ -55,10 +70,10 @@ public class ReviewsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getReviewById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getReviewById(@PathVariable("id") Integer id) throws NotFoundException {
         var review = repository.findById(id);
-        if(review.isPresent()) return new ResponseEntity<>(review, HttpStatus.OK);
-        return new ResponseEntity<>(new StringResponse("No existe review con ese id"),HttpStatus.NOT_FOUND);
+        if(review.isPresent()) return new ResponseEntity<>(review.get(), HttpStatus.OK);
+        throw new NotFoundException("No existe review con ese id");
     }
 
     @PostMapping
@@ -96,7 +111,7 @@ public class ReviewsController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteReview(@PathVariable("id") Integer id) {
         if (!repository.existsById(id))
-            return new ResponseEntity<>(new StringResponse("No se eliminó esa review, no existe"),HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new StringResponse("No se eliminó esa review, no existe"),HttpStatus.CREATED);
         repository.delete(repository.getReferenceById(id));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

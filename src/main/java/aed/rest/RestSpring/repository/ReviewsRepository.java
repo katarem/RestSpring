@@ -2,12 +2,14 @@ package aed.rest.RestSpring.repository;
 
 import aed.rest.RestSpring.model.GenresEntity;
 import aed.rest.RestSpring.model.ReviewsEntity;
+import aed.rest.RestSpring.model.custom.YearReviews;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface ReviewsRepository extends JpaRepository<ReviewsEntity, Integer> {
 
@@ -16,5 +18,8 @@ public interface ReviewsRepository extends JpaRepository<ReviewsEntity, Integer>
     public List<ReviewsEntity> findByGenres(@Param("nombreGenero") String nombreGenero);
     @Query("SELECT r FROM ReviewsEntity r JOIN r.genres g WHERE g.genre = :nombreGenero AND r.score >= :nota")
     public List<ReviewsEntity> findByGenresAndScore(@Param("nombreGenero") String nombreGenero, @Param("nota") BigDecimal nota);
+
+    @Query("SELECT r.score,r FROM ReviewsEntity r GROUP BY r.score")
+    public List<Object[]> getReviewsByNota();
 
 }

@@ -1,5 +1,6 @@
 package aed.rest.RestSpring.controller;
 
+import aed.rest.RestSpring.exceptions.NotFoundException;
 import aed.rest.RestSpring.model.GenresEntity;
 import aed.rest.RestSpring.repository.GenresRepository;
 import aed.rest.RestSpring.utils.StringResponse;
@@ -26,10 +27,11 @@ public class GenresController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getGenreById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getGenreById(@PathVariable("id") Integer id) throws NotFoundException {
         var opt = repository.findById(id);
-        return opt.isPresent() ? new ResponseEntity<>(opt.get(),HttpStatus.OK)
-                               : new ResponseEntity<>(new StringResponse("No existía dicho género"),HttpStatus.NOT_FOUND);
+        if(opt.isPresent())
+            return new ResponseEntity<>(opt.get(),HttpStatus.OK);
+        throw new NotFoundException("No existe género con ese id");
     }
 
     @PostMapping
@@ -57,9 +59,9 @@ public class GenresController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteGenre(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteGenre(@PathVariable("id") Integer id) throws NotFoundException {
         if (!repository.existsById(id))
-            return new ResponseEntity<>(new StringResponse("No existía ese género"),HttpStatus.NOT_FOUND);
+            throw new NotFoundException("No existe género con ese id");
         repository.delete(repository.getReferenceById(id));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 

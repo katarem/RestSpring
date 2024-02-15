@@ -1,5 +1,6 @@
 package aed.rest.RestSpring.controller;
 
+import aed.rest.RestSpring.exceptions.NotFoundException;
 import aed.rest.RestSpring.model.ArtistsEntity;
 import aed.rest.RestSpring.model.YearsEntity;
 import aed.rest.RestSpring.repository.ArtistsRepository;
@@ -32,10 +33,11 @@ public class YearsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getYearsById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getYearsById(@PathVariable("id") Integer id) throws NotFoundException {
         var opt = repository.findById(id);
-        return opt.isPresent() ? new ResponseEntity<>(opt.get(),HttpStatus.OK)
-                : new ResponseEntity<>(new StringResponse("No existía dicho year"),HttpStatus.NOT_FOUND);
+        if(opt.isPresent())
+            new ResponseEntity<>(opt.get(),HttpStatus.OK);
+        throw new NotFoundException("No existe year con ese id");
     }
 
     @PostMapping
@@ -61,9 +63,9 @@ public class YearsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteYear(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteYear(@PathVariable("id") Integer id) throws NotFoundException {
         if (!repository.existsById(id))
-            return new ResponseEntity<>(new StringResponse("No existía ese year"),HttpStatus.NOT_FOUND);
+            throw new NotFoundException("No existe year con ese id");
         repository.delete(repository.getReferenceById(id));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

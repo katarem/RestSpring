@@ -21,20 +21,16 @@ public class ArtistsController {
     ArtistsRepository repository;
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllArtists(@RequestParam(name = "name", required = false) String name,
-                                           @RequestParam(name = "index",required = false) Integer index,
-                                           @RequestParam(name = "size",required = false) Integer size){
-        if(index == null) index = 0;
-        if(size == null) size = 10;
-        Pageable pageable = PageRequest.of(index,size);
-        if(name == null) return new ResponseEntity<>(repository.findAll(pageable),HttpStatus.OK);
+    public ResponseEntity<?> getAllArtists(@RequestParam(name = "name", required = false) String name){
+        if(name == null) return new ResponseEntity<>(repository.findAll(),HttpStatus.OK);
         return new ResponseEntity<>(repository.findArtistsEntitiesByArtistContainsIgnoreCase(name),HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getArtistById(@PathVariable("id") Integer id) {
-        if(!repository.existsById(id)) return new ResponseEntity<>(new StringResponse("No existe artista con ese id."),HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(repository.getReferenceById(id),HttpStatus.OK);
+        var artista = repository.findById(id);
+        if(artista.isPresent()) return new ResponseEntity<>(artista.get(), HttpStatus.OK);
+        return new ResponseEntity<>(new StringResponse("No existe artista con ese id"),HttpStatus.NOT_FOUND);
     }
 
     @PostMapping
