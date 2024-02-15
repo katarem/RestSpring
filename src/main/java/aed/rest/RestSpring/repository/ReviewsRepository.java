@@ -1,8 +1,6 @@
 package aed.rest.RestSpring.repository;
 
-import aed.rest.RestSpring.model.GenresEntity;
 import aed.rest.RestSpring.model.ReviewsEntity;
-import aed.rest.RestSpring.model.custom.YearReviews;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

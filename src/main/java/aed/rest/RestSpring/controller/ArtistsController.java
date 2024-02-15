@@ -1,5 +1,6 @@
 package aed.rest.RestSpring.controller;
 
+import aed.rest.RestSpring.exceptions.NotFoundException;
 import aed.rest.RestSpring.model.ArtistsEntity;
 import aed.rest.RestSpring.repository.ArtistsRepository;
 import aed.rest.RestSpring.utils.StringResponse;
@@ -27,10 +28,10 @@ public class ArtistsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getArtistById(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getArtistById(@PathVariable("id") Integer id) throws NotFoundException {
         var artista = repository.findById(id);
         if(artista.isPresent()) return new ResponseEntity<>(artista.get(), HttpStatus.OK);
-        return new ResponseEntity<>(new StringResponse("No existe artista con ese id"),HttpStatus.NOT_FOUND);
+        throw new NotFoundException("No existe artista con ese id");
     }
 
     @PostMapping
@@ -56,9 +57,9 @@ public class ArtistsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteArtista(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteArtista(@PathVariable("id") Integer id) throws NotFoundException {
         if (!repository.existsById(id))
-            return new ResponseEntity<>(new StringResponse("No se eliminó artista: no existe"),HttpStatus.NOT_FOUND);
+            throw new NotFoundException("No existe artista con ese id");
         repository.delete(repository.getReferenceById(id));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
